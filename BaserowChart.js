@@ -39,6 +39,10 @@ class BaserowChart {
     }
 
     draw_chart(container, chart_type, data) {
+        const existing_canvas = container.querySelector('canvas');
+        if(existing_canvas) {
+            existing_canvas.remove();
+        }
         const ctx = document.createElement('canvas')
         container.appendChild(ctx)
         new Chart(ctx, {
