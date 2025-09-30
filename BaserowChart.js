@@ -34,7 +34,7 @@ class BaserowChart {
     get_table_data(data_table, column_number, callback) {
         const tryGetData = () => {
             const table = document.querySelector(`.${data_table}`);
-            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
+            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
             const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
             const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
             console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
