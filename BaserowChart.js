@@ -3,12 +3,13 @@ class BaserowChart {
         this.charts_to_render = charts_to_render;
 
         const title = document.querySelector('title');
-        const page_title = title.textContent;
-        this.renderAllCharts(page_title);
+        
+        this.renderAllCharts(title.textContent);
 
         const observer = new MutationObserver(() => {
             if (!window._Initialized) {
                 window._Initialized = true;
+                const page_title = title.textContent;
                 console.log('Title changed to:', page_title);
                 this.renderAllCharts(page_title);
             }
