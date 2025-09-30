@@ -7,7 +7,7 @@ class BaserowChart {
         this.renderAllCharts(page_title);    
         const observer = new MutationObserver(() => {
             console.log('Title changed to:', page_title);
-            renderAllCharts(page_title);
+            this.renderAllCharts(page_title);
         });
         observer.observe(title, { childList: true });
     }
