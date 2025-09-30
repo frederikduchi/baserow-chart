@@ -31,30 +31,21 @@ class BaserowChart {
     }
 
     get_table_data(data_table, column_number) {
-        const try_get_data = () => {
-            const table = document.querySelector(`.${data_table}`);
-            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
-            const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
-            const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
+        const table = document.querySelector(`.${data_table}`);
+        let labels = [];
+        let values = [];
+        let title = '';
+        
+        const interval_id = setInterval(() => {
+            labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
+            values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
+            title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
             console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
-            if (labels.length === 0 || values.length === 0) {
-                return null;
+            if (labels.length > 0 && values.length > 0) {
+                clearInterval(interval_id);
             }
-            return { labels, values, title };
-        }
-
-        let data = try_get_data();
-        console.log('Initial data extraction result:', data);
-        if (data === null) {
-            const interval = setInterval(() => {
-                data = try_get_data();
-                if (data !== null) {
-                    clearInterval(interval);
-                    return data;
-                }
-            }, 500);
-        }
-        return data;
+        }, 500);
+        return { labels, values, title };
     }
 
     draw_chart(container, chart_type, data) {
