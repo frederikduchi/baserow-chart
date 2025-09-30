@@ -25,27 +25,39 @@ class BaserowChart {
     }
 
     renderChart(chart) {
-        const data = this.get_table_data(chart.data_table, chart.column_number);
-        console.log('Rendering chart:', chart, 'with data:', data);
-        this.draw_chart(document.querySelector(`.${chart.container}`), chart.type, data, chart.page_title);
+        this.get_table_data(chart.data_table, chart.column_number, (data) => {
+            console.log('Rendering chart:', chart, 'with data:', data);
+            this.draw_chart(document.querySelector(`.${chart.container}`), chart.type, data, chart.page_title);
+        });
     }
 
-    get_table_data(data_table, column_number) {
-        const table = document.querySelector(`.${data_table}`);
-        let labels = [];
-        let values = [];
-        let title = '';
-        
-        const interval_id = setInterval(() => {
-            labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
-            values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
-            title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
+    get_table_data(data_table, column_number, callback) {
+        const tryGetData = () => {
+            const table = document.querySelector(`.${data_table}`);
+            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
+            const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
+            const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
             console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
+
             if (labels.length > 0 && values.length > 0) {
-                clearInterval(interval_id);
+                return { labels, values, title };
             }
-        }, 500);
-        return { labels, values, title };
+            return null;
+        };
+
+        let result = tryGetData();
+
+        if (result) {
+            callback(result);
+        } else {
+            const interval = setInterval(() => {
+                result = tryGetData();
+                if (result) {
+                    clearInterval(interval);
+                    callback(result);
+                }
+            }, 500);
+        }
     }
 
     draw_chart(container, chart_type, data) {
