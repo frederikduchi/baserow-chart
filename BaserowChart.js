@@ -1,4 +1,6 @@
 class BaserowChart {
+    current_title = '';
+
     constructor(charts_to_render) {
         this.charts_to_render = charts_to_render;
 
@@ -8,8 +10,11 @@ class BaserowChart {
 
         const observer = new MutationObserver(() => {
             const page_title = title.textContent;
-            console.log('Title changed to:', page_title);
-            this.renderAllCharts(page_title);
+            if(this.current_title !== page_title) {
+                console.log('Title changed to:', page_title);
+                this.renderAllCharts(page_title);
+                this.current_title = page_title;
+            }
         });
         observer.observe(title, { childList: true });
     }
