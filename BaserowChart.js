@@ -36,7 +36,7 @@ class BaserowChart {
             const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
             const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
             const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
-
+            console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
             if (labels.length === 0 || values.length === 0) {
                 return null;
             }
@@ -44,15 +44,17 @@ class BaserowChart {
         }
 
         let data = try_get_data();
-        if (!data) {
+        console.log('Initial data extraction result:', data);
+        if (data === null) {
             const interval = setInterval(() => {
                 data = try_get_data();
-                if (data) {
+                if (data !== null) {
                     clearInterval(interval);
                     return data;
                 }
             }, 500);
         }
+        return data;
     }
 
     draw_chart(container, chart_type, data) {
