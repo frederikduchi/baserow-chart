@@ -10,7 +10,7 @@ class BaserowChart {
 
         const observer = new MutationObserver(() => {
             const page_title = title.textContent;
-            if(this.current_title !== page_title) {
+            if (this.current_title !== page_title) {
                 console.log('Title changed to:', page_title);
                 this.renderAllCharts(page_title);
                 this.current_title = page_title;
@@ -31,16 +31,33 @@ class BaserowChart {
     }
 
     get_table_data(data_table, column_number) {
-        const table = document.querySelector(`.${data_table}`);
-        const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
-        const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
-        const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
-        return { labels, values, title };
+        const try_get_data = () => {
+            const table = document.querySelector(`.${data_table}`);
+            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
+            const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
+            const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
+
+            if (labels.length === 0 || values.length === 0) {
+                return null;
+            }
+            return { labels, values, title };
+        }
+
+        let data = try_get_data();
+        if (!data) {
+            const interval = setInterval(() => {
+                data = try_get_data();
+                if (data) {
+                    clearInterval(interval);
+                    return data;
+                }
+            }, 500);
+        }
     }
 
     draw_chart(container, chart_type, data) {
         const existing_canvas = container.querySelector('canvas');
-        if(existing_canvas) {
+        if (existing_canvas) {
             existing_canvas.remove();
         }
         const ctx = document.createElement('canvas')
