@@ -93,7 +93,6 @@ class BaserowChart {
             backgroundColors = ['rgb(46,144,250)']
         }
         
-;
         new Chart(ctx, {
             type: chart_type,
             data: {
