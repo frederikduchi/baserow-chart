@@ -87,7 +87,7 @@ class BaserowChart {
 
         // set configuration based on the chart type
         let display_legend = true;
-        let backgroundColors = ['rgba(231, 145, 135, 1)', 'rgba(116, 227, 162, 1)', 'rgba(134, 186, 221, 1)', 'rgba(229, 205, 108, 1)', 'rgba(242, 173, 113, 1)']
+        let backgroundColors = ['rgb(255, 179, 186)', 'rgb(255, 223, 186)', 'rgb(255, 255, 186)', 'rgb(186, 255, 201)', 'rgb(186, 225, 255)', 'rgb(255, 204, 229)', 'rgb(204, 255, 229)', 'rgb(229, 204, 255)', 'rgb(204, 229, 255)', 'rgb(255, 239, 186)']
         if(chart_type === 'bar') {
             display_legend = false;
             backgroundColors = ['rgb(46,144,250)']
