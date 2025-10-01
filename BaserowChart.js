@@ -25,6 +25,7 @@ class BaserowChart {
     }
 
     renderChart(chart) {
+        console.log('Preparing to render chart:', chart);
         this.get_table_data(chart.data_table, chart.column_number, (data) => {
             console.log('Rendering chart:', chart, 'with data:', data);
             this.draw_chart(document.querySelector(`.${chart.container}`), chart.type, data, chart.page_title);
@@ -34,9 +35,25 @@ class BaserowChart {
     get_table_data(data_table, column_number, callback) {
         const tryGetData = () => {
             const table = document.querySelector(`.${data_table}`);
-            const labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
-            const values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
-            const title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
+            let labels = [];
+            let values = [];
+            let title = '';
+            // check if it is a table element or column element
+            if (table.classList.contains('table-element')) {
+                labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
+                values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
+                title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
+            }
+            if (table.classList.contains('column-element')) {
+                // labels: loop over all the columns and search for the fist .ab-text element
+                console.log('Column element detected');
+                console.log(table.querySelectorAll(`.ab-text`));
+                console.log(table.querySelectorAll(`.column-element__column:nth-child(1) .ab-link`));
+                labels = Array.from(table.querySelectorAll(`.column-element__column:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
+                values = Array.from(table.querySelectorAll(`.column-element__column:nth-child(${column_number}) .ab-link`)).map(i => parseFloat(i.textContent));
+                title = 'Number of works'
+                
+            }
             console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
 
             if (labels.length > 0 && values.length > 0) {
@@ -67,6 +84,16 @@ class BaserowChart {
         }
         const ctx = document.createElement('canvas')
         container.appendChild(ctx)
+
+        // set configuration based on the chart type
+        let display_legend = true;
+        let backgroundColors = ['rgba(231, 145, 135, 1)', 'rgba(116, 227, 162, 1)', 'rgba(134, 186, 221, 1)', 'rgba(229, 205, 108, 1)', 'rgba(242, 173, 113, 1)']
+        if(chart_type === 'bar') {
+            display_legend = false;
+            backgroundColors = ['rgb(46,144,250)']
+        }
+        
+;
         new Chart(ctx, {
             type: chart_type,
             data: {
@@ -74,18 +101,20 @@ class BaserowChart {
                 datasets: [{
                     label: data.title,
                     data: data.values,
-                    backgroundColor: ['rgb(46,144,250)']
+                    backgroundColor: backgroundColors
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: false
+                        display: display_legend
                     }
                 }
             }
         });
+        container.style.width = '960px';
+        container.style.margin = '0 auto';
     }
 }
 
