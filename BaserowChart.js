@@ -5,8 +5,9 @@ class BaserowChart {
     constructor(charts_to_render) {
         const title = document.querySelector('title');
         const page_title = title.textContent;
+        console.log('Initial page title:', page_title);
         this.charts_to_render = charts_to_render;
-        this.init(title, page_title);
+        this.init(page_title);
 
         const observer = new MutationObserver(() => {
             if (this.current_title !== page_title) {
