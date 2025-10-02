@@ -121,7 +121,7 @@ class BaserowChart {
         if (chart_type === 'choropleth') {
             options = {
                 showOutline: true,
-                showGraticule: true,
+                showGraticule: false,
                 plugins: {
                     legend: {
                         display: false
