@@ -47,8 +47,7 @@ class BaserowChart {
             let title = '';
             // check if it is a table element or column element
             if (table.classList.contains('table-element')) {
-                // TODO: replace ab-text with ab-link
-                labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
+                labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
                 values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
                 title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
             }
