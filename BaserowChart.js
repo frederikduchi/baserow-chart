@@ -1,15 +1,18 @@
 class BaserowChart {
     current_title = '';
+    countries = []
 
     constructor(charts_to_render) {
-        this.charts_to_render = charts_to_render;
-
         const title = document.querySelector('title');
+        this.charts_to_render = charts_to_render;
+        this.init(title, title.textContent);
+    }
 
-        this.renderAllCharts(title.textContent);
+    async init(title, page_title) {
+        this.countries = await this.getCountries();
+        this.renderAllCharts(page_title);
 
         const observer = new MutationObserver(() => {
-            const page_title = title.textContent;
             if (this.current_title !== page_title) {
                 console.log('Title changed to:', page_title);
                 this.renderAllCharts(page_title);
@@ -18,7 +21,11 @@ class BaserowChart {
         });
         observer.observe(title, { childList: true });
     }
-
+    async getCountries() {
+        const response = await fetch('https://unpkg.com/world-atlas/countries-50m.json');
+        const data = await response.json();
+        return ChartGeo.topojson.feature(data, data.objects.countries).features;
+    }
     renderAllCharts(page_title) {
         console.log('Rendering charts for page:', page_title);
         this.charts_to_render.filter(chart => chart.page_title === page_title).forEach(chart => this.renderChart(chart))
@@ -40,7 +47,8 @@ class BaserowChart {
             let title = '';
             // check if it is a table element or column element
             if (table.classList.contains('table-element')) {
-                labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
+                // TODO: replace ab-text with ab-link
+                labels = Array.from(table.querySelectorAll(`tr > td:nth-child(1) .ab-text`)).map(i => i.textContent.trim());
                 values = Array.from(table.querySelectorAll(`tr > td:nth-child(${column_number}) .ab-text`)).map(i => parseFloat(i.textContent));
                 title = table.querySelector(`thead tr th:nth-child(${column_number})`).textContent.trim();
             }
@@ -52,7 +60,7 @@ class BaserowChart {
                 labels = Array.from(table.querySelectorAll(`.column-element__column:nth-child(1) .ab-link`)).map(i => i.textContent.trim());
                 values = Array.from(table.querySelectorAll(`.column-element__column:nth-child(${column_number}) .ab-link`)).map(i => parseFloat(i.textContent));
                 title = 'Number of works'
-                
+
             }
             console.log('Extracted labels:', labels, 'values:', values, 'title:', title);
 
@@ -88,32 +96,70 @@ class BaserowChart {
         // set configuration based on the chart type
         let display_legend = true;
         let backgroundColors = ['rgb(255, 179, 186)', 'rgb(255, 223, 186)', 'rgb(255, 255, 186)', 'rgb(186, 255, 201)', 'rgb(186, 225, 255)', 'rgb(255, 204, 229)', 'rgb(204, 255, 229)', 'rgb(229, 204, 255)', 'rgb(204, 229, 255)', 'rgb(255, 239, 186)']
-        if(chart_type === 'bar') {
+        let scales = {};
+
+        if (chart_type === 'bar') {
             display_legend = false;
             backgroundColors = ['rgb(46,144,250)']
         }
-        
-        new Chart(ctx, {
+
+        if (chart_type === 'choropleth') {
+            scales = {
+                projection: {
+                    axis: 'x',
+                    projection: 'equalEarth'
+                }
+            }
+            display_legend = false
+
+            const original_labels = data.labels;
+            data.labels = this.countries.map(c => c.properties.name);
+            const original_values = data.values;
+            data.values = this.countries.map((country) => {
+                const index = original_labels.findIndex(label => label.toLowerCase() === country.properties.name.toLowerCase());
+                if (index > -1) {
+                    return { feature: country, value: original_values[index] };
+                } else {
+                    return { feature: country, value: 0 };
+                }
+            });
+        }
+
+        const chart = new Chart(ctx, {
             type: chart_type,
             data: {
                 labels: data.labels,
                 datasets: [{
                     label: data.title,
                     data: data.values,
-                    backgroundColor: backgroundColors
                 }]
             },
             options: {
-                responsive: true,
+                showOutline: true,
+                showGraticule: true,
                 plugins: {
                     legend: {
                         display: display_legend
+                    }
+                },
+                scales: scales,
+                color: {
+                    quantize: 15,
+                    axis: 'x',
+                    legend: {
+                        position: 'bottom-right',
+                        align: 'right',
                     }
                 }
             }
         });
         container.style.width = '960px';
         container.style.margin = '0 auto';
+        if (chart_type !== 'choropleth') {
+        
+            chart.data.datasets[0].backgroundColor = backgroundColors;
+        }
+
     }
 }
 
